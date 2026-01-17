@@ -1,0 +1,35 @@
+# Binaries for programs
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with the `-o` flag
+*.out
+
+# Dependency directories (these are managed by `go.mod` and `go.sum`)
+# set by `go mod vendor`
+vendor/
+
+# Go work file, introduced in Go 1.18, local dev file
+go.work
+go.work.sum
+
+# Environment files
+.env
+
+# IDE-specific files and directories to ignore
+# e.g., VS Code
+.vscode/
+# e.g., IntelliJ/GoLand
+.idea/
+# e.g., Eclipse
+.metadata/
+
+# Operating system files
+.DS_Store # macOS
+Thumbs.db # Windows
