@@ -1,3 +1,7 @@
+/*
+	A simple customized log.Logger that adds 
+	file name and code line while printing to stdout.
+*/
 package logger
 
 import (

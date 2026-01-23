@@ -1,3 +1,6 @@
+/*
+This file is used as a playground. Will be trashed later.
+*/
 package main
 
 import (
@@ -19,7 +22,7 @@ import (
 // S. NO. | Website Name | Request history | total requests | fail rate | success rate
 
 func main() {
-	
+
 	os.Setenv("secret", "This is my little secret")
 	os.Setenv("aws-key", "Zuckerburg took it, I don't have it now!")
 

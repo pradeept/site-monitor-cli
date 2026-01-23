@@ -13,18 +13,18 @@ func worker(address string, ch chan<- store.SiteStatus) {
 	resp, err := http.Get(address)
 	if err != nil {
 		ch <- store.SiteStatus{
-			Address:    address,
+			SiteUrl:    address,
 			StatusCode: 503,
-			Status:     "Not reachable",
+			StatusText:     "Not reachable",
 		}
 		return
 	}
 	defer resp.Body.Close()
 
 	ch <- store.SiteStatus{
-		Address:    address,
+		SiteUrl:    address,
 		StatusCode: resp.StatusCode,
-		Status:     strings.Split(resp.Status, " ")[1],
+		StatusText:     strings.Split(resp.Status, " ")[1],
 	}
 }
 
