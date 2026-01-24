@@ -8,9 +8,15 @@ import (
 	"github.com/pradeept/site-monitor-cli/internals/logger"
 )
 
+type Site struct {
+	Id       int
+	SiteName string
+	SiteUrl  string
+}
+
 type SiteStatus struct {
 	Id         int
-	SiteUrl    string
+	Site       *Site
 	StatusCode int
 	StatusText string
 }
@@ -67,5 +73,51 @@ func NewStore(dbString string) (*Store, error) {
 }
 
 // Insert method
+func (s *Store) InsertSite(site *Site) error {
+	insertStatement := `INSERT INTO site(site_name, site_url) VALUES(?,?);`
+	if _, err := s.db.Exec(insertStatement, site.SiteName, site.SiteUrl); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Update a site
+func (s *Store) UpdateSite(site *Site) error {
+	updateStatement := `UPDATE site SET site_name=?, site_url=? WHERE id=?;`
+	if _, err := s.db.Exec(updateStatement, site.SiteName, site.SiteUrl, site.Id); err != nil {
+		return err
+	}
+	return nil
+}
 
 // Delete method
+func (s *Store) DeleteSite(site *Site) error {
+	deleteStatement := `DELETE FROM site WHERE siteId=?;`
+	if _, err := s.db.Exec(deleteStatement, site.Id); err != nil {
+		return err
+	}
+	return nil
+}
+
+// List all sites
+func (s *Store) ListSites() ([]Site, error) {
+	queryString := `SELECT id, site_name, site_url FROM site;`
+	var siteList []Site
+	rows, err := s.db.Query(queryString)
+	if err != nil {
+		return siteList, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var site Site
+		if err := rows.Scan(
+			&site.Id,
+			&site.SiteName,
+			&site.SiteUrl,
+		); err != nil {
+			return nil, err
+		}
+		siteList = append(siteList, site)
+	}
+	return siteList, nil
+}
