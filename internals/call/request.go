@@ -9,13 +9,16 @@ import (
 	"github.com/pradeept/site-monitor-cli/internals/store"
 )
 
+/*
+Fix sitestatus; Now it takes a site struct;
+*/
 func worker(address string, ch chan<- store.SiteStatus) {
 	resp, err := http.Get(address)
 	if err != nil {
 		ch <- store.SiteStatus{
 			SiteUrl:    address,
 			StatusCode: 503,
-			StatusText:     "Not reachable",
+			StatusText: "Not reachable",
 		}
 		return
 	}
@@ -24,7 +27,7 @@ func worker(address string, ch chan<- store.SiteStatus) {
 	ch <- store.SiteStatus{
 		SiteUrl:    address,
 		StatusCode: resp.StatusCode,
-		StatusText:     strings.Split(resp.Status, " ")[1],
+		StatusText: strings.Split(resp.Status, " ")[1],
 	}
 }
 

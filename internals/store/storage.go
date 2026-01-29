@@ -16,7 +16,7 @@ type Site struct {
 
 type SiteStatus struct {
 	Id         int
-	Site       *Site
+	SiteId     int
 	StatusCode int
 	StatusText string
 }
@@ -74,7 +74,7 @@ func NewStore(dbString string) (*Store, error) {
 
 // Insert method
 func (s *Store) InsertSite(site *Site) error {
-	insertStatement := `INSERT INTO site(site_name, site_url) VALUES(?,?);`
+	insertStatement := `INSERT INTO site(site_name, site_url) VALUES(?,?,?);S(?,?);`
 	if _, err := s.db.Exec(insertStatement, site.SiteName, site.SiteUrl); err != nil {
 		return err
 	}
@@ -108,6 +108,8 @@ func (s *Store) ListSites() ([]Site, error) {
 		return siteList, err
 	}
 	defer rows.Close()
+	// for every row create a site struct
+	// and store it into site list
 	for rows.Next() {
 		var site Site
 		if err := rows.Scan(
@@ -120,4 +122,44 @@ func (s *Store) ListSites() ([]Site, error) {
 		siteList = append(siteList, site)
 	}
 	return siteList, nil
+}
+
+// -------- request --------------
+
+// List all requests of a site
+func (s *Store) ListSiteRequests(siteId string) ([]SiteStatus, error) {
+	queryString := `SELECT id, site_id, status_code, status_text FROM request r WHERE site_id=?;`
+
+	rows, err := s.db.Query(queryString, siteId)
+	if err != nil {
+		return nil, err
+	}
+
+	var siteList []SiteStatus
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var siteStatus SiteStatus
+		if err := rows.Scan(
+			&siteStatus.Id,
+			&siteStatus.SiteId,
+			&siteStatus.StatusCode,
+			&siteStatus.StatusText,
+		); err != nil {
+			return nil, err
+		}
+	}
+	return siteList, nil
+}
+
+// Insert a sitestatus
+func (s *Store) InsertSiteRequest(st SiteStatus) error{
+	queryString := `INSERT into request(site_id, status_code, status_text) VALUES(?,?,?);`
+
+	if _,err := s.db.Exec(queryString, st.SiteId, st.StatusCode, st.StatusText); err != nil{
+		return err;
+	}
+
+	return nil;
 }
