@@ -27,7 +27,7 @@ type Store struct {
 }
 
 func NewStore(dbString string) (*Store, error) {
-
+	log.Println(dbString)
 	db, err := sql.Open("sqlite3", dbString)
 
 	if err != nil {
@@ -154,12 +154,12 @@ func (s *Store) ListSiteRequests(siteId string) ([]SiteStatus, error) {
 }
 
 // Insert a sitestatus
-func (s *Store) InsertSiteRequest(st SiteStatus) error{
+func (s *Store) InsertSiteRequest(st SiteStatus) error {
 	queryString := `INSERT into request(site_id, status_code, status_text) VALUES(?,?,?);`
 
-	if _,err := s.db.Exec(queryString, st.SiteId, st.StatusCode, st.StatusText); err != nil{
-		return err;
+	if _, err := s.db.Exec(queryString, st.SiteId, st.StatusCode, st.StatusText); err != nil {
+		return err
 	}
 
-	return nil;
+	return nil
 }

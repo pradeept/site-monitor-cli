@@ -33,3 +33,6 @@ go.work.sum
 # Operating system files
 .DS_Store # macOS
 Thumbs.db # Windows
+
+# Database
+internals/store/app.db

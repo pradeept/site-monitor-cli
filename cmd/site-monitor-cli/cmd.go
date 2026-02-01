@@ -16,6 +16,10 @@ func ConfigCommands() {
 	removeCmd := flag.NewFlagSet("remove", flag.ExitOnError)
 	removeWebsite := removeCmd.String("website", "", "Specify the url (ex: https://www.google.com)")
 
+	// sub-command show to list a table of site and requests
+
+	// USE CHARM
+
 	// no arguments are passed
 	if len(os.Args) < 2 {
 		fmt.Println("Expected an argument, passed 0")
@@ -34,6 +38,9 @@ func ConfigCommands() {
 		// parse flags for remove sub-command
 		removeCmd.Parse(os.Args[2:])
 		fmt.Println("[Remove] Website: ", *removeWebsite)
+	
+	case "show":
+
 
 	default:
 		fmt.Println("Expected arguments, passed 0")

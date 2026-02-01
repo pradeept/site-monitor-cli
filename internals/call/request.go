@@ -10,13 +10,15 @@ import (
 )
 
 /*
-Fix sitestatus; Now it takes a site struct;
+TODO:
+	Fix sitestatus; Now it takes a site struct;
+	Also add context to http calls
 */
 func worker(address string, ch chan<- store.SiteStatus) {
 	resp, err := http.Get(address)
 	if err != nil {
 		ch <- store.SiteStatus{
-			SiteUrl:    address,
+			// SiteUrl:    address,
 			StatusCode: 503,
 			StatusText: "Not reachable",
 		}
@@ -25,7 +27,7 @@ func worker(address string, ch chan<- store.SiteStatus) {
 	defer resp.Body.Close()
 
 	ch <- store.SiteStatus{
-		SiteUrl:    address,
+		// SiteUrl:    address,
 		StatusCode: resp.StatusCode,
 		StatusText: strings.Split(resp.Status, " ")[1],
 	}
