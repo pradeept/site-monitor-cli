@@ -4,8 +4,10 @@ import (
 	"os"
 	"path"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/pradeept/site-monitor-cli/internals/logger"
 	"github.com/pradeept/site-monitor-cli/internals/store"
+	"github.com/pradeept/site-monitor-cli/internals/tui"
 )
 
 func main() {
@@ -30,5 +32,10 @@ func main() {
 	log.Println(db)
 	log.Println("[Success] Store initialized")
 
-	log.Print("Let's gooo")
+	p := tea.NewProgram(
+		tui.NewModel("Hey there"),
+	)
+	if err = p.Start(); err != nil {
+		panic(err)
+	}
 }
