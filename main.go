@@ -4,51 +4,78 @@ This file is used as a playground. Will be trashed later.
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	_ "github.com/mattn/go-sqlite3" //driver
 )
 
-// STORE: SQlit
-// Requests: net/http
-// CLI : flag
-// STD out: log / fmt
+var baseStyle = lipgloss.NewStyle().
+	BorderStyle(lipgloss.NormalBorder()).
+	BorderForeground(lipgloss.Color("240"))
 
-// add website (website string, time time.Seconds)
-// remove website (website string)
-// list website stats () []websites
-
-// LIVE VIEW: live refresh of websites request status
-// S. NO. | Website Name | Request history | total requests | fail rate | success rate
 func main() {
-	fmt.Println("A")
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
+
+	p := tea.NewProgram(
+		InitialModel(),
+	)
+	if err := p.Start(); err != nil {
+		panic(err)
+	}
+}
+
+type Model struct {
+	table table.Model
+}
+
+func InitialModel() Model {
+	cols := []table.Column{
+`		{Title: "SI No.", Width: 15},
+`		{Title: "Website", Width: 25},
+		{Title: "Avg. Success Rate", Width: 50},
 	}
 
-	dbPath := filepath.Join(pwd, "test.db")
-	fmt.Println("DB path:", dbPath)
-
-	db, err := sql.Open("sqlite3", dbPath+"?_timeout=5000")
-	if err != nil {
-		log.Fatal(err)
+	rows := []table.Row{
+		{"1", "https://www.google.com", "100%"},
+		{"2", "https://pradeept.dev", "100%"},
+		{"3", "https://youtube.com", "100%"},
+		{"4", "https://facebook.com", "100%"},
 	}
-	defer db.Close()
+	t := table.New(table.WithColumns(cols), table.WithFocused(true), table.WithHeight(7), table.WithRows(rows))
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	t.SetStyles(s)
 
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS users (
-			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-			name TEXT
-		);
-	`)
-	if err != nil {
-		log.Fatal(err)
+	m := Model{t}
+	return m
+}
+
+func (m Model) Init() tea.Cmd {
+	return nil
+}
+
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+
+	case tea.KeyMsg:
+		switch msg.String() {
+
+		// These keys should exit the program.
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		}
 	}
+	return m, nil
+}
 
-	log.Println("Table 'users' created successfully")
+func (m Model) View() string {
+	return baseStyle.Render(m.table.View()) + "\n"
 }
