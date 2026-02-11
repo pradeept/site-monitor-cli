@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3" //driver
@@ -9,9 +10,10 @@ import (
 )
 
 type Site struct {
-	Id       int
-	SiteName string
-	SiteUrl  string
+	Id          int
+	SiteName    string
+	SiteUrl     string
+	RequestTime int64
 }
 
 type SiteStatus struct {
@@ -44,7 +46,8 @@ func NewStore(dbString string) (*Store, error) {
  		CREATE TABLE IF NOT EXISTS site (
   		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   		site_name TEXT ,
-		site_url TEXT NOT NULL UNIQUE
+		site_url TEXT NOT NULL UNIQUE,
+		request_time INT DEFAULT 1
  	);`
 
 	if _, err := db.Exec(siteTable); err != nil {
@@ -72,10 +75,44 @@ func NewStore(dbString string) (*Store, error) {
 	}, nil
 }
 
+// Find method
+func (s *Store) FindSite(siteName string, siteURL string) ([]Site, error) {
+	findStatement := `SELECT * FROM site WHERE site_name=? OR site_url=?;`
+
+	rows, err := s.db.Query(findStatement, siteName, siteURL)
+	if err != nil {
+		return nil, fmt.Errorf("[Error] failed to fetch the site: ", err)
+	}
+	defer rows.Close()
+	var sites []Site
+	for rows.Next() {
+		var site Site
+		if err := rows.Scan(
+			&site.Id,
+			&site.SiteName,
+			&site.SiteUrl,
+			&site.RequestTime,
+		); err != nil {
+			return nil, fmt.Errorf("[Error] Failed to scan the rows: ", err)
+		}
+		sites = append(sites, site)
+	}
+	return sites, nil
+}
+
 // Insert method
 func (s *Store) InsertSite(site *Site) error {
-	insertStatement := `INSERT INTO site(site_name, site_url) VALUES(?,?,?);S(?,?);`
-	if _, err := s.db.Exec(insertStatement, site.SiteName, site.SiteUrl); err != nil {
+	insertStatement := `INSERT INTO site(site_name, site_url, request_time) VALUES(?,?,?);`
+
+	exists, err := s.FindSite(site.SiteName, site.SiteUrl)
+	if err != nil {
+		return fmt.Errorf("[Error] validating new site: ", err)
+	}
+	if len(exists) > 0 {
+		return fmt.Errorf("[Error] Site already exists")
+	}
+
+	if _, err := s.db.Exec(insertStatement, site.SiteName, site.SiteUrl, site.RequestTime); err != nil {
 		return err
 	}
 	return nil
@@ -83,8 +120,8 @@ func (s *Store) InsertSite(site *Site) error {
 
 // Update a site
 func (s *Store) UpdateSite(site *Site) error {
-	updateStatement := `UPDATE site SET site_name=?, site_url=? WHERE id=?;`
-	if _, err := s.db.Exec(updateStatement, site.SiteName, site.SiteUrl, site.Id); err != nil {
+	updateStatement := `UPDATE site SET site_name=?, site_url=?, request_time=? WHERE id=?;`
+	if _, err := s.db.Exec(updateStatement, site.SiteName, site.SiteUrl, site.RequestTime, site.Id); err != nil {
 		return err
 	}
 	return nil
@@ -101,7 +138,7 @@ func (s *Store) DeleteSite(site *Site) error {
 
 // List all sites
 func (s *Store) ListSites() ([]Site, error) {
-	queryString := `SELECT id, site_name, site_url FROM site;`
+	queryString := `SELECT id, site_name, site_url, request_time FROM site;`
 	var siteList []Site
 	rows, err := s.db.Query(queryString)
 	if err != nil {
@@ -116,6 +153,7 @@ func (s *Store) ListSites() ([]Site, error) {
 			&site.Id,
 			&site.SiteName,
 			&site.SiteUrl,
+			&site.RequestTime,
 		); err != nil {
 			return nil, err
 		}

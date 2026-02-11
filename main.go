@@ -30,8 +30,8 @@ type Model struct {
 
 func InitialModel() Model {
 	cols := []table.Column{
-`		{Title: "SI No.", Width: 15},
-`		{Title: "Website", Width: 25},
+		{Title: "SI No.", Width: 15},
+		{Title: "Website", Width: 25},
 		{Title: "Avg. Success Rate", Width: 50},
 	}
 
@@ -77,5 +77,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	return baseStyle.Render(m.table.View()) + "\n"
+
+	var style = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#FAFAFA")).
+		Background(lipgloss.Color("#7D56F4")).
+		Width(22)
+
+	return baseStyle.Render(m.table.View()) + "\n" + style.Render("Hello, kitty")
 }
